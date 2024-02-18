@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Analyzer</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+    <link rel="manifest" href="/images/site.webmanifest">
+    <style>
+        body {
+            background: url('static/images/welcome-hero/banner.jpg') no-repeat center center fixed;
+            margin: 20px 0 20px 0;
+            background-color: rgba(0, 255, 255, 0.301);
+            text-align: center; /* Center align text */
+        }
+
+        .jumbotron {
+            background-color: rgba(0, 255, 255, 0.301);
+            display: flex;
+            justify-content: center
+        }
+
+        .form-control {
+            padding: 12px 20px;
+            box-sizing: border-box;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            resize: none;
+
+        }
+
+        .btn {
+            align-items: center;
+            justify-content: center;
+        }
+
+        .original-title,
+        .summary-title {
+            font-size: 20px;
+            font-weight: bold;
+            padding: 2px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .app {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .original-txt {
+            padding: 20px;
+        }
+
+        .summary-txt {
+            padding: 20px;
+            margin-left: 10px;
+            max-width: fit-content;
+        }
+
+        .heading {
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+        }
+
+        .recommended-container {
+            text-align: left; /* Align text in the container to the left */
+            margin: auto; /* Center the container */
+            max-width: 600px; /* Set a max-width for better readability */
+        }
+
+        .recommended-container h2, li {
+            color: white;
+            font-size: 28px;
+        }
+    </style>
+</head>
+
+<body>
+    <br>
+    <h1>Resume Analyzer</h1>
+    <br><br>
+    <form method="post" action="{{ url_for('index') }}">
+        <label for="selected_category">Categories :</label>
+        <select id="selected_category" name="selected_category">
+            {% for category in categories %}
+            <option value="{{ category }}" {% if category == selected_category %}selected{% endif %}>{{ category }}</option>
+            {% endfor %}
+        </select>
+        <br><br>
+        <input type="submit" value="Recommend">
+    </form>
+<br><br>
+    {% if name is not none %}
+    <div class="recommended-container">
+        <h2>Recommended Resumes:</h2>
+        <ul>
+            {% for item in name %}
+            <li>{{ item }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+</body>
+
+</html>

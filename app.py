@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify, render_template_string, send_file
 import os
+import pickle
+import pandas as pd
 from werkzeug.utils import secure_filename
 from pdf_search import search_skill_in_pdfs  # Import the search function from pdf_search
 from my_analysis import visualize_resume_from_pdf 
@@ -124,6 +126,31 @@ def cultural_fit_evaluation():
 def detailed_dashboard():
     return render_template('detailed_dashboard.html', candidates=candidates)
 
+
+def recommend(category, data, similarity):
+    index = data[data['Category'] == category].index[0]
+    distances = similarity[index]
+    resume_list = sorted(list(enumerate(distances)), key=lambda x: x[1])[1:7]
+
+    recommended_resume = [data.iloc[i[0]].resume_id for i in resume_list]
+    return recommended_resume
+
+@app.route('/index', methods=['GET', 'POST'])
+def index():
+    if request.method == 'POST':
+        selected_category = request.form['selected_category']
+        name = recommend(selected_category, data, similarity)
+
+        return render_template('index.html', selected_category=selected_category, name=name, categories=data['Category'].unique())
+
+    return render_template('index.html', selected_category='', name=None, categories=data['Category'].unique())
+
+
 if __name__ == '__main__':
-    app.config['UPLOAD_FOLDER'] = 'uploads'
-    app.run(debug=True)
+        app.config['UPLOAD_FOLDER'] = 'uploads'
+        data_dict = pickle.load(open('data_dict.pkl', 'rb'))
+        data = pd.DataFrame(data_dict)
+        similarity = pickle.load(open('similarity.pkl', 'rb'))
+        
+        app.run(debug=True)
+

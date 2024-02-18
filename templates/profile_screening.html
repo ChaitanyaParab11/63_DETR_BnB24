@@ -70,15 +70,28 @@
         function loadResumeVisualization() {
             // Retrieve the PDF name from the URL parameter
             var pdfName = getParameterByName('pdf');
-    
+
             if (pdfName) {
-                // Update the src attribute of the img tag with the image path
-                document.getElementById('resumeVisualization').src = 'static/images/visualization.png';
+                // Define an array of possible image paths
+                var imagePaths = [
+                    'static/images/visualization.png',
+                    'static/images/visualization1.png',
+                    'static/images/visualization2.png',
+                    'static/images/visualization3.png',
+                    'static/images/visualization4.png'
+                ];
+
+                // Randomly select an image path from the array
+                var randomImagePath = imagePaths[Math.floor(Math.random() * imagePaths.length)];
+
+                // Update the src attribute of the img tag with the randomly selected image path
+                document.getElementById('resumeVisualization').src = randomImagePath;
             } else {
                 console.error('PDF parameter not found in the URL');
                 alert('PDF parameter not found in the URL.');
             }
         }
+
     
         // Load the visualization on page load
         document.addEventListener('DOMContentLoaded', loadResumeVisualization);
@@ -171,49 +184,6 @@
         </div>
     </section>
 
-    <!-- Employee Information Section -->
-    <section id="employee-information" class="employee-information">
-        <div class="container">
-            <div class="section-title">
-                <h2>Employee Information</h2>
-            </div>
-
-            <div class="row">
-                <!-- Right side - Labels -->
-                <div class="col-md-12">
-                    <div class="employee-label">
-                        <h4>Education</h4>
-                        <p>University Name - Degree - Graduation Year</p>
-                    </div>
-
-                    <div class="employee-label">
-                        <h4>Skills</h4>
-                        <p>Skill 1, Skill 2, Skill 3, ...</p>
-                    </div>
-
-                    <div class="employee-label">
-                        <h4>Experience</h4>
-                        <p>Company Name - Position - Duration</p>
-                        <p>Company Name - Position - Duration</p>
-                        <!-- Add more experience details as needed -->
-                    </div>
-
-                    <div class="employee-label">
-                        <h4>Projects</h4>
-                        <p>Project Name - Description - Year</p>
-                        <p>Project Name - Description - Year</p>
-                        <!-- Add more project details as needed -->
-                    </div>
-
-                    <!-- Placeholder for dynamic data -->
-                    <div class="employee-label">
-                        <h4>Data Label</h4>
-                        <p id="dynamicData">Placeholder for dynamic data</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
     
     
 

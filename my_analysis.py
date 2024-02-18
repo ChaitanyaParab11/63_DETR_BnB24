@@ -38,5 +38,5 @@ def visualize_resume_from_pdf(pdf_path):
     plt.ylabel("Count")
     plt.title("Analysis Of Resume")
     # plt.show()
-    plt.savefig('static/images/visualization.png')
+    plt.savefig('static/images/visualization4.png')
 
