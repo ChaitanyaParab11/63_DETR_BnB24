@@ -145,7 +145,7 @@
                     <h2>Bulk PDF Upload</h2>
                 </div>
                 <div class="bulk-pdf-upload-form">
-                    <form action="{{ url_for('handle_bulk_pdf_upload') }}" method="post" enctype="multipart/form-data">
+                    <form id="bulkUploadForm" action="{{ url_for('handle_bulk_pdf_upload') }}" method="post" enctype="multipart/form-data" onsubmit="uploadBulkFiles(event)">
                         <label for="pdfFiles">Select PDF files to upload:</label>
                         <input type="file" name="pdfFiles" id="pdfFiles" accept=".pdf" multiple required>
                         <button type="submit" class="upload-btn">Upload PDFs</button>
@@ -153,6 +153,7 @@
                 </div>
             </div>
         </section>
+        
         <div class="welcome-hero-serch-box">
             <div class="welcome-hero-form">
                 <div class="single-welcome-hero-form">
@@ -181,28 +182,63 @@
             </div>
         </div>
         
-        <div id="searchResultContainer" style="margin-top: 10px; max-height: 100px; overflow-y: auto;">
-            <div id="searchResult">
-                {% if pdf_names %}
-                    <ul style="list-style-type: none; padding: 0;">
-                        {% for pdf_name in pdf_names %}
-                            <li style="font-size: 20px; color: white;">
-                                <a href="{{ url_for('open_pdf', filename=pdf_name) }}" target="_blank" style="color: white;">{{ pdf_name }}</a>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% elif no_result %}
-                    <p style="font-size: 20px; color: white;">No results found for the skill "{{ skill }}".</p>
-                {% endif %}
-            </div>
-            <button class="search-result-btn" onclick="profile_screening()">
-                Analyse <i data-feather="search"></i>
-            </button>
+        <div style="display: flex; align-items: flex-start;">
+
+            <!-- Left side - Search results -->
+            <div id="searchResultContainer" style="margin-top: 10px; max-height: 100px; overflow-y: auto; flex: 1;">
+                <div id="searchResult">
+                    {% if pdf_names %}
+                        <ul style="list-style-type: none; padding: 0;">
+                            {% for pdf_name in pdf_names %}
+                                <li style="font-size: 20px; color: white; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+                                    <span style="flex: 1;">
+                                        <a href="{{ url_for('open_pdf', filename=pdf_name) }}" target="_blank" style="color: white;">{{ pdf_name }}</a>
+                                    </span>
+                                    <button class="welcome-hero-btn" onclick="analysePDF('{{ pdf_name }}')">
+                                        Analyse <i data-feather="search"></i>
+                                    </button>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% elif no_result %}
+                        <p style="font-size: 20px; color: white;">No results found for the skill "{{ skill }}".</p>
+                    {% endif %}
+                </div>
+            </div> 
+            
+        
+         
         </div>
+        
         
             
             
             <script>
+                function uploadBulkFiles(event) {
+                    event.preventDefault();  // Prevent the default form submission
+
+                    var form = document.getElementById('bulkUploadForm');
+                    var formData = new FormData(form);
+
+                    fetch(form.action, {
+                        method: form.method,
+                        body: formData
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            // Show a success alert
+                            alert('Bulk file(s) uploaded successfully!');
+                        } else {
+                            // Handle error, show an alert or perform other actions
+                            alert('Error uploading bulk file(s). Please try again.');
+                        }
+                    })
+                    .catch(error => {
+                        // Handle network or other errors
+                        alert('An error occurred. Please try again later.');
+                        console.error('Error:', error);
+                    });
+                }
                 function searchSkill() {
                     var skillToSearch = document.getElementById('searchSkillInput').value;
                     if (skillToSearch) {
@@ -222,13 +258,22 @@
                         .catch(error => console.error('Error:', error));
                     }
                 }
+
+                function profile_screening(){
+                    window.location.href = "{{ url_for('profile_screening') }}";
+                }
+
+                function analysePDF(pdfName) {
+                    // Redirect to the profile screening page with the PDF name as a parameter
+                    window.location.href = "/profile_screening?pdf=" + encodeURIComponent(pdfName);
+                }
             </script>
             
         </div>
     </div>
 </section>
 
-
+<br><br><br>
 
 <!-- List Topics Section -->
 <section id="list-topics" class="list-topics">

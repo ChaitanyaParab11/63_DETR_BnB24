@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify, r
 import os
 from werkzeug.utils import secure_filename
 from pdf_search import search_skill_in_pdfs  # Import the search function from pdf_search
+from my_analysis import visualize_resume_from_pdf 
 
 app = Flask(__name__)
 
@@ -61,8 +62,13 @@ def search_skill():
             {% if pdf_names %}
                 <ul style="list-style-type: none; padding: 0;">
                     {% for pdf_name in pdf_names %}
-                        <li style="font-size: 20px; color: white;">
-                            <a href="{{ url_for('open_pdf', filename=pdf_name) }}" target="_blank" style="color: white;">{{ pdf_name }}</a>
+                        <li style="font-size: 20px; color: white; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+                            <span style="flex: 1;">
+                                <a href="{{ url_for('open_pdf', filename=pdf_name) }}" target="_blank" style="color: white;">{{ pdf_name }}</a>
+                            </span>
+                            <button class="welcome-hero-btn" onclick="analysePDF('{{ pdf_name }}')">
+                                Analyse <i data-feather="search"></i>
+                            </button>
                         </li>
                     {% endfor %}
                 </ul>
@@ -74,17 +80,33 @@ def search_skill():
 
     return jsonify(response)
 
+@app.route('/analyse_pdf/<pdf_name>')
+def analyse_pdf(pdf_name):
+    pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], pdf_name)
+
+    # Check if the file exists
+    if not os.path.exists(pdf_path):
+        return "File not found", 404
+
+    # Save visualization as image
+    image_path = visualize_resume_from_pdf(pdf_path, "static/images/visualization.png")
+
+    # Render the HTML with the image path
+    return render_template('profile_screening.html', image_path=image_path)
+
 @app.route('/open_pdf/<filename>')
 def open_pdf(filename):
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     return send_file(filepath, mimetype='application/pdf', as_attachment=False)
 
 
-@app.route('/profile-screening')
+@app.route('/profile_screening', methods=['GET'])
 def profile_screening():
-    # Your logic for the 'profile_screening' route
-    return render_template('profile_screening.html', candidates=candidates)
+    pdf_name = request.args.get('pdf')  # Get the PDF name from the URL parameter
+    # You may want to include additional logic here to process the PDF name if needed
 
+    # Render the profile_screening.html template and pass the PDF name
+    return render_template('profile_screening.html', pdf_name=pdf_name)
 
 @app.route('/qualifications-experience-analysis')
 def qualifications_experience_analysis():
@@ -103,4 +125,5 @@ def detailed_dashboard():
     return render_template('detailed_dashboard.html', candidates=candidates)
 
 if __name__ == '__main__':
+    app.config['UPLOAD_FOLDER'] = 'uploads'
     app.run(debug=True)

@@ -52,6 +52,38 @@
         <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
         <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
+
+    <!-- Update the JavaScript code -->
+    <script>
+        // Function to retrieve URL parameters
+        function getParameterByName(name, url) {
+            if (!url) url = window.location.href;
+            name = name.replace(/[\[\]]/g, "\\$&");
+            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, " "));
+        }
+    
+        // Function to load and display the visualization
+        function loadResumeVisualization() {
+            // Retrieve the PDF name from the URL parameter
+            var pdfName = getParameterByName('pdf');
+    
+            if (pdfName) {
+                // Update the src attribute of the img tag with the image path
+                document.getElementById('resumeVisualization').src = 'static/images/visualization.png';
+            } else {
+                console.error('PDF parameter not found in the URL');
+                alert('PDF parameter not found in the URL.');
+            }
+        }
+    
+        // Load the visualization on page load
+        document.addEventListener('DOMContentLoaded', loadResumeVisualization);
+    </script>
+
 </head>
 
 <body>
@@ -60,13 +92,11 @@
     <![endif]-->
 
     <style>
-        body {
-            background-image: url('static/images/welcome-hero/banner.jpg'); /* Replace with the actual path to your background image */
+        body,nav {
+            background: url('static/images/welcome-hero/banner.jpg') no-repeat center center fixed;
+            background-size: cover;
             background-color: black;
-            background-size: cover; /* Adjust as needed */
-            background-repeat: no-repeat;
-            font;
-            background-attachment: fixed; /*Optional: Ensures the background stays fixed while scrolling*/
+            /* font; This line seems to be incorrect, you might want to remove it */
         }
 
         #employee-information,
@@ -125,6 +155,7 @@
 
     </section><!-- /.top-area-->
     <!-- top-area End -->
+    
 
     <!-- Profile Screening Section -->
     <section id="profile-screening" class="profile-screening">
@@ -136,6 +167,7 @@
                     fit. The system learns from historical hiring data and feedback to continuously improve its
                     screening accuracy.</p>
             </div>
+            <img id="resumeVisualization" src="" alt="Resume Visualization">
         </div>
     </section>
 
@@ -182,6 +214,8 @@
             </div>
         </div>
     </section>
+    
+    
 
 
     <!-- Include all js compiled plugins (below), or include individual files as needed -->
