@@ -1,129 +1,51 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify, render_template_string, send_file
-import os
-from werkzeug.utils import secure_filename
-from pdf_search import search_skill_in_pdfs  # Import the search function from pdf_search
-from my_analysis import visualize_resume_from_pdf 
-
-app = Flask(__name__)
+import streamlit as st
+import pickle
+import pandas as pd
 
 
-# Mock data (replace with actual data handling)
-candidates = [
-    {'name': 'John Doe', 'qualifications': 'Bachelor\'s in Computer Science', 'experience': '5 years', 'skills': 'Python, Java', 'cultural_fit': 8.5},
-    {'name': 'Jane Smith', 'qualifications': 'Master\'s in Business Administration', 'experience': '7 years', 'skills': 'Leadership, Communication', 'cultural_fit': 9.2},
-    # Add more candidate data
-]
+def recommend(text):
+    # resume_index = data[data['description'] == text].index[0]
+
+    # Assuming `data` is your DataFrame and `text` is the description you're searching for
+    filtered_data = data[data['description'] == text]
+
+    if not filtered_data.empty:
+        resume_index = filtered_data.index[0]
+        # Proceed with operations using resume_index
+    else:
+        # Handle the case where the description does not match any rows
+        print("No matching description found.")
+        resume_index = None  # or any other fallback action
+
+    distances = similarity[resume_index]
+    resume_list = sorted(list(enumerate(distances)),reverse=True, key=lambda x: x[1])[1:7]
+
+    recommended_resume = []
+    # recommended_videos_posters = []
+
+    for i in resume_list:
+        recommended_resume.append(data.iloc[i[0]].resume_id)
 
 
-# Set the path where you want to store the uploaded PDFs
-UPLOAD_FOLDER = 'uploads'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-# Check if the file extension is allowed
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'pdf'}
-
-@app.route('/')
-def dashboard():
-    return render_template('dashboard.html')
-
-@app.route('/handle_bulk_pdf_upload', methods=['POST'])
-def handle_bulk_pdf_upload():
-    if request.method == 'POST':
-        # Check if the POST request has the file part
-        if 'pdfFiles' not in request.files:
-            return redirect(request.url)
-
-        pdf_files = request.files.getlist('pdfFiles')
-
-        for pdf_file in pdf_files:
-            # Check if the file is a PDF
-            if pdf_file and allowed_file(pdf_file.filename):
-                # Securely save the file with a unique name
-                filename = secure_filename(pdf_file.filename)
-                pdf_file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-
-                # Perform additional processing if needed
-
-        # Return a response indicating successful upload
-        return 'Bulk PDF upload successful'
-
-@app.route('/search_skill', methods=['POST'])
-def search_skill():
-    data = request.get_json()
-    skill_to_search = data.get('searchSkill', '')
-    
-    # Replace this with your logic to search for the skill in PDFs
-    # and get the list of PDF names containing the skill
-    pdf_names = search_skill_in_pdfs(skill_to_search)
-
-    response = {
-        "html": render_template_string("""
-            {% if pdf_names %}
-                <ul style="list-style-type: none; padding: 0;">
-                    {% for pdf_name in pdf_names %}
-                        <li style="font-size: 20px; color: white; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 5px;">
-                            <span style="flex: 1;">
-                                <a href="{{ url_for('open_pdf', filename=pdf_name) }}" target="_blank" style="color: white;">{{ pdf_name }}</a>
-                            </span>
-                            <button class="welcome-hero-btn" onclick="analysePDF('{{ pdf_name }}')">
-                                Analyse <i data-feather="search"></i>
-                            </button>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% elif no_result %}
-                <p style="font-size: 20px; color: white;">No results found for the skill "{{ skill }}".</p>
-            {% endif %}
-        """, pdf_names=pdf_names, skill=skill_to_search)
-    }
-
-    return jsonify(response)
-
-@app.route('/analyse_pdf/<pdf_name>')
-def analyse_pdf(pdf_name):
-    pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], pdf_name)
-
-    # Check if the file exists
-    if not os.path.exists(pdf_path):
-        return "File not found", 404
-
-    # Save visualization as image
-    image_path = visualize_resume_from_pdf(pdf_path, "static/images/visualization.png")
-
-    # Render the HTML with the image path
-    return render_template('profile_screening.html', image_path=image_path)
-
-@app.route('/open_pdf/<filename>')
-def open_pdf(filename):
-    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    return send_file(filepath, mimetype='application/pdf', as_attachment=False)
+    # return recommended_videos, recommended_videos_posters
+    return recommended_resume
 
 
-@app.route('/profile_screening', methods=['GET'])
-def profile_screening():
-    pdf_name = request.args.get('pdf')  # Get the PDF name from the URL parameter
-    # You may want to include additional logic here to process the PDF name if needed
+data_dict = pickle.load(open('data_dict.pkl', 'rb'))
+data = pd.DataFrame(data_dict)
+similarity = pickle.load(open('similarity.pkl', 'rb'))
 
-    # Render the profile_screening.html template and pass the PDF name
-    return render_template('profile_screening.html', pdf_name=pdf_name)
+st.title('Resume Analyzer')
 
-@app.route('/qualifications-experience-analysis')
-def qualifications_experience_analysis():
-    return render_template('qualifications_experience_analysis.html', candidates=candidates)
+title = "Enter Job Description"
+user_input = st.text_area(title, height=300)
 
-@app.route('/skills-assessment')
-def skills_assessment():
-    return render_template('skills_assessment.html', candidates=candidates)
 
-@app.route('/cultural-fit-evaluation')
-def cultural_fit_evaluation():
-    return render_template('cultural_fit_evaluation.html', candidates=candidates)
+if st.button('Recommend'):
+    resume = recommend(user_input)
 
-@app.route('/detailed-dashboard')
-def detailed_dashboard():
-    return render_template('detailed_dashboard.html', candidates=candidates)
+    if resume:  # This checks if the list is not empty
+        st.write(resume[0])
+    else:
+        st.write('No data available')
 
-if __name__ == '__main__':
-    app.config['UPLOAD_FOLDER'] = 'uploads'
-    app.run(debug=True)
