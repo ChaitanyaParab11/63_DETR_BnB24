@@ -143,13 +143,13 @@
         <section id="bulk-pdf-upload" class="bulk-pdf-upload">
             <div class="container">
                 <div class="section-title">
-                    <h2>Bulk PDF Upload</h2>
+                    <h2 style="color: white;">Bulk PDF Upload</h2>
                 </div>
                 <div class="bulk-pdf-upload-form">
                     <form id="bulkUploadForm" action="{{ url_for('handle_bulk_pdf_upload') }}" method="post" enctype="multipart/form-data" onsubmit="uploadBulkFiles(event)">
-                        <label for="pdfFiles">Select PDF files to upload:</label>
-                        <input type="file" name="pdfFiles" id="pdfFiles" accept=".pdf" multiple required>
-                        <button type="submit" class="upload-btn">Upload PDFs</button>
+                        <label for="pdfFiles" style="color: white;">Select PDF files to upload:</label>
+                        <input style="color: white;" type="file" name="pdfFiles" id="pdfFiles" accept=".pdf" multiple required>
+                        <button type="submit" class="upload-btn" style="color: white;">Upload PDFs</button>
                     </form>
                 </div>
             </div>
